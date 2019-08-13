@@ -8,7 +8,7 @@ close all
 
 %% Import log file
 % Specify name of input file
-input_filename = 'sensorLog_2pitch.txt';
+input_filename = 'sensorLog_60_90_30.txt';
 output_filename = 'data.mat';
 fid=fopen(input_filename);
 

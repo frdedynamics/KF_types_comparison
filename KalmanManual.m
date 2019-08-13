@@ -11,13 +11,13 @@ dt = 0.01;
 % Gy_rad = Gy * pi / 180.0;
 % Gz_rad = Gz * pi / 180.0;
 
-Gx_rad = gyro_ts.Data(1);
-Gy_rad = gyro_ts.Data(2);
-Gz_rad = gyro_ts.Data(3);
+Gx_rad = gyro_ts.Data(:,1);
+Gy_rad = gyro_ts.Data(:,2);
+Gz_rad = gyro_ts.Data(:,3);
 
-Ax = acc_ts.Data(1);
-Ay = acc_ts.Data(2);
-Az = acc_ts.Data(3);
+Ax = acc_ts.Data(:,1);
+Ay = acc_ts.Data(:,2);
+Az = acc_ts.Data(:,3);
 
 % 1) Accelerometer only
 phi_hat_acc   = atan2(Ay, sqrt(Ax .^ 2 + Az .^ 2));
@@ -27,7 +27,7 @@ theta_hat_acc = atan2(-Ax, sqrt(Ay .^ 2 + Az .^ 2));
 phi_hat_gyr   = zeros(1, length(gyro_ts));
 theta_hat_gyr = zeros(1, length(gyro_ts));
 
-for i = 2:length(gyro_ts)
+for i = 2:length(gyro_ts.Data)
    p = Gx_rad(i);
    q = Gy_rad(i);
    r = Gz_rad(i);
@@ -45,7 +45,7 @@ alpha = 0.1;
 phi_hat_complimentary   = zeros(1, length(gyro_ts));
 theta_hat_complimentary = zeros(1, length(gyro_ts));
 
-for i=2:length(gyro_ts)
+for i=2:length(gyro_ts.Data)
     p = Gx_rad(i);
     q = Gy_rad(i);
     r = Gz_rad(i);
@@ -69,12 +69,12 @@ Q = eye(4) * 0.01;
 R = eye(2) * 10;
 state_estimate = [0 0 0 0]';
 
-phi_hat_kalman    = zeros(1, length(gyro_ts));
-bias_phi_kalman   = zeros(1, length(gyro_ts));
-theta_hat_kalman  = zeros(1, length(gyro_ts));
-bias_theta_kalman = zeros(1, length(gyro_ts));
+phi_hat_kalman    = zeros(1, length(gyro_ts.Data));
+bias_phi_kalman   = zeros(1, length(gyro_ts.Data));
+theta_hat_kalman  = zeros(1, length(gyro_ts.Data));
+bias_theta_kalman = zeros(1, length(gyro_ts.Data));
 
-for i=2:length(gyro_ts)
+for i=2:length(gyro_ts.Data)
     
     p = Gx_rad(i);
     q = Gy_rad(i);
@@ -133,3 +133,5 @@ legend('Complementary', 'Accelerometer', 'Gyro', 'Kalman');
 xlabel('Time (s)');
 ylabel('Angle (Degrees)');
 title('Pitch');
+
+figure;
