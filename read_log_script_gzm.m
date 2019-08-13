@@ -43,8 +43,11 @@ gyro_data_length = length(gyro_data);
 
 accel_data = accel_data(length(accel_data)+1-min(length(accel_data),length(gyro_data)):end,:);
 
-acc_ts = timeseries(accel_data(:,2:4), 1:length(accel_data), 'name', 'Accelerometer');
-gyro_ts = timeseries(gyro_data(:,2:4), 1:length(gyro_data), 'name', 'Gyroscope');
+sample_time = 0.01;
+sim_time = (sample_time*(length(accel_data)-1));
+t_data = 0:sample_time:sim_time;
+acc_ts = timeseries(accel_data(:,2:4), t_data, 'name', 'Accelerometer');
+gyro_ts = timeseries(gyro_data(:,2:4), t_data, 'name', 'Gyroscope');
 
 % gyro_data(:,1) = 0:1:length(gyro_data)-1;
 % 
