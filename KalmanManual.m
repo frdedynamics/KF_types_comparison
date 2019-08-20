@@ -104,8 +104,8 @@ for i=2:number_of_data
     q = Gy(i);
     r = Gz(i);
    
-    phi_hat   = phi_hat_kalman(i - 1);
-    theta_hat = theta_hat_kalman(i - 1);
+    phi_hat   = phi_hat_kalman(i - 1) + bias_phi_kalman(i-1);
+    theta_hat = theta_hat_kalman(i - 1) + bias_theta_kalman(i-1);
     
     phi_dot   = p + sin(phi_hat) * tan(theta_hat) * q + cos(phi_hat) * tan(theta_hat) * r;
     theta_dot = cos(phi_hat) * q - sin(phi_hat) * r;
