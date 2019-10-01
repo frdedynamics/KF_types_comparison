@@ -10,12 +10,12 @@ read_log_script
 % be our main data sets.
 
 %% Extract out numerical entries of data into an array
-Gx = gyro_ts.Data(:,1);
-Gy = gyro_ts.Data(:,2);
+Gx = gyro_ts.Data(:,2);
+Gy = gyro_ts.Data(:,1);
 Gz = gyro_ts.Data(:,3);
 
-Ax = acc_ts.Data(:,1);
-Ay = acc_ts.Data(:,2);
+Ax = acc_ts.Data(:,2);
+Ay = acc_ts.Data(:,1);
 Az = acc_ts.Data(:,3);
 
 % Our mobile app logs the data in each 10ms.
@@ -32,10 +32,6 @@ number_of_data = min(length(gyro_ts.Data),length(acc_ts.Data));
 % the body is very low.
 % phi_hat_acc   = ...;
 % theta_hat_acc = ...;
-
-phi_hat_acc   = atan2(Ay, sqrt(Ax .^ 2 + Az .^ 2));
-theta_hat_acc = atan2(Ax, sqrt(Ay .^ 2 + Az .^ 2));
-
 
 %% 2) Gyroscope only
 % This method is based on integration the velocity to find the position as
@@ -151,7 +147,7 @@ hold on;
 % legend('Complimentary', 'Accelerometer', 'Gyro', 'Kalman');
 xlabel('Time (s)');
 ylabel('Angle (Degrees)');
-title('Pitch');
+title('Roll');
 xlim([0 t(end)])
 
 figure(2);
@@ -163,5 +159,5 @@ hold on;
 % legend('Complementary', 'Accelerometer', 'Gyro', 'Kalman');
 xlabel('Time (s)');
 ylabel('Angle (Degrees)');
-title('Roll');
+title('Pitch');
 xlim([0 t(end)])
