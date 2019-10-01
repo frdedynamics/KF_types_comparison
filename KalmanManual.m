@@ -33,8 +33,8 @@ number_of_data = min(length(gyro_ts.Data),length(acc_ts.Data));
 % phi_hat_acc   = ...;
 % theta_hat_acc = ...;
 
-phi_hat_acc   = ...;
-theta_hat_acc = ...;
+phi_hat_acc   = atan2(Ay, sqrt(Ax .^ 2 + Az .^ 2));
+theta_hat_acc = atan2(Ax, sqrt(Ay .^ 2 + Az .^ 2));
 
 
 %% 2) Gyroscope only
@@ -152,7 +152,7 @@ hold on;
 xlabel('Time (s)');
 ylabel('Angle (Degrees)');
 title('Pitch');
-% xlim([0 t(end)])
+xlim([0 t(end)])
 
 figure(2);
 plot(t, theta_hat_acc);
@@ -164,4 +164,4 @@ hold on;
 xlabel('Time (s)');
 ylabel('Angle (Degrees)');
 title('Roll');
-% xlim([0 t(end)])
+xlim([0 t(end)])
