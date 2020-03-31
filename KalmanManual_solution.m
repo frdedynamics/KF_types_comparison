@@ -145,7 +145,7 @@ plot(t, phi_hat_kalman);
 legend('Complimentary', 'Accelerometer', 'Gyro', 'Kalman');
 xlabel('Time (s)');
 ylabel('Angle (Degrees)');
-title('Roll');
+title('Pitch');
 xlim([0 t(end)])
 
 figure(2);
@@ -157,5 +157,5 @@ plot(t, theta_hat_kalman);
 legend('Complementary', 'Accelerometer', 'Gyro', 'Kalman');
 xlabel('Time (s)');
 ylabel('Angle (Degrees)');
-title('Pitch');
+title('Roll');
 xlim([0 t(end)])
