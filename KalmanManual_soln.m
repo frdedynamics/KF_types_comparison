@@ -10,12 +10,12 @@ read_log_script
 % be our main data sets.
 
 %% Extract out numerical entries of data into an array
-Gx = gyro_ts.Data(:,1);
-Gy = gyro_ts.Data(:,2);
+Gx = gyro_ts.Data(:,2);
+Gy = gyro_ts.Data(:,1);
 Gz = gyro_ts.Data(:,3);
 
-Ax = acc_ts.Data(:,1);
-Ay = acc_ts.Data(:,2);
+Ax = acc_ts.Data(:,2);
+Ay = acc_ts.Data(:,1);
 Az = acc_ts.Data(:,3);
 
 % Our mobile app logs the data in each 10ms.
@@ -25,15 +25,7 @@ dt = 0.01;
 % gyroscope.
 number_of_data = min(length(gyro_ts.Data),length(acc_ts.Data));
 
-%% 1) Accelerometer only
-% This method is also known as tilt calculation. We make this calculation
-% based on the gravity vector and its components on each accelerometer
-% axes. This technique is only applicable where the linear acceleration of
-% the body is very low.
-phi_hat_acc   = atan2(Ay, sqrt(Ax .^ 2 + Az .^ 2));
-theta_hat_acc = atan2(-Ax, sqrt(Ay .^ 2 + Az .^ 2));
-
-%% 2) Gyroscope only
+%% 1) Gyroscope only
 % This method is based on integration the velocity to find the position as
 % we all do in highschool. It works okay for short time frames. However, in
 % longer period there will be accumulation during the integration process -
@@ -50,11 +42,17 @@ for i = 2:number_of_data
    theta_hat = theta_hat_gyr(i - 1);
     
    phi_hat_gyr(i)   = phi_hat   + dt * (p + sin(phi_hat) * tan(theta_hat) * q + cos(phi_hat) * tan(theta_hat) * r);
-   theta_hat_gyr(i) = theta_hat + dt * (cos(phi_hat) * q - sin(phiIdea behind complementary filter is to take slow moving signals from accelerometer and fast moving signals from a gyroscope and combine them.
-Accelerometer gives a good indicator of orientation in static conditions.
-Gyroscope gives a good indicator of tilt in dynamic conditions.
-So the idea is to pass the accelerometer signals through a low-pass filter and the gyroscope signals through a high-pass filter and combine them to give the final rate._hat) * r);
+   theta_hat_gyr(i) = theta_hat + dt * (cos(phi_hat) * q - sin(phi_hat) * r);
 end
+
+%% 2) Accelerometer only
+% This method is also known as tilt calculation. We make this calculation
+% based on the gravity vector and its components on each accelerometer
+% axes. This technique is only applicable where the linear acceleration of
+% the body is very low.
+phi_hat_acc   = atan2(-Ay, sqrt(Ax .^ 2 + Az .^ 2));
+theta_hat_acc = atan2(Ax, sqrt(Ay .^ 2 + Az .^ 2));
+
 
 %% 3) Complimentary Filter
 % Complementary filter is a combination of a low-pass and a high-pass
@@ -77,11 +75,13 @@ for i=2:number_of_data
     phi_hat   = phi_hat_complimentary(i - 1);
     theta_hat = theta_hat_complimentary(i - 1);
     
+    % the same as you calculated in gyro only step.
     phi_hat_gyr_comp   = phi_hat   + dt * (p + sin(phi_hat) * tan(theta_hat) * q + cos(phi_hat) * tan(theta_hat) * r);
     theta_hat_gyr_comp = theta_hat + dt * (cos(phi_hat) * q - sin(phi_hat) * r);
-       
+    
+    % you can use the acc_hat(i) since it is already calculated as vectors
     phi_hat_complimentary(i)   = (1 - alpha) * phi_hat_gyr_comp   + alpha * phi_hat_acc(i);
-    theta_hat_complimentary(i) = (1 - alpha) * theta_hat_gyr_comp + alpha * theta_hat_acc(i);    
+    theta_hat_complimentary(i) = (1 - alpha) * theta_hat_gyr_comp + alpha * theta_hat_acc(i);     
 end
 
 %% 4) Kalman Filter
@@ -107,8 +107,8 @@ for i=2:number_of_data
     q = Gy(i);
     r = Gz(i);
    
-    phi_hat   = phi_hat_kalman(i - 1);
-    theta_hat = theta_hat_kalman(i - 1);
+    phi_hat   = phi_hat_kalman(i - 1) + bias_phi_kalman(i-1);
+    theta_hat = theta_hat_kalman(i - 1) + bias_theta_kalman(i-1);
     
     phi_dot   = p + sin(phi_hat) * tan(theta_hat) * q + cos(phi_hat) * tan(theta_hat) * r;
     theta_dot = cos(phi_hat) * q - sin(phi_hat) * r;
@@ -133,31 +133,31 @@ for i=2:number_of_data
 end
 
 %% Convert all estimates to degrees
-phi_hat_acc = phi_hat_acc * 180.0 / pi; theta_hat_acc = theta_hat_acc * 180.0 / pi;
 phi_hat_gyr = phi_hat_gyr * 180.0 / pi; theta_hat_gyr = theta_hat_gyr * 180.0 / pi;
+phi_hat_acc = phi_hat_acc * 180.0 / pi; theta_hat_acc = theta_hat_acc * 180.0 / pi;
 phi_hat_complimentary = phi_hat_complimentary * 180.0 / pi; theta_hat_complimentary = theta_hat_complimentary * 180.0 / pi;
 phi_hat_kalman = phi_hat_kalman * 180.0 / pi; theta_hat_kalman = theta_hat_kalman * 180.0 / pi;
 
 %% Plots
 t = acc_ts.Time;
-plot(t, phi_hat_complimentary);
+plot(t, phi_hat_gyr);
 hold on;
 plot(t, phi_hat_acc);
-plot(t, phi_hat_gyr);
+plot(t, phi_hat_complimentary);
 plot(t, phi_hat_kalman);
-legend('Complimentary', 'Accelerometer', 'Gyro', 'Kalman');
+legend('Gyro', 'Accelerometer', 'Complimentary', 'Kalman');
 xlabel('Time (s)');
 ylabel('Angle (Degrees)');
 title('Roll');
 xlim([0 t(end)])
 
 figure(2);
-plot(t, theta_hat_complimentary);
+plot(t, theta_hat_gyr);
 hold on;
 plot(t, theta_hat_acc);
-plot(t, theta_hat_gyr);
+plot(t, theta_hat_complimentary);
 plot(t, theta_hat_kalman);
-legend('Complementary', 'Accelerometer', 'Gyro', 'Kalman');
+legend('Gyro', 'Accelerometer', 'Complimentary', 'Kalman');
 xlabel('Time (s)');
 ylabel('Angle (Degrees)');
 title('Pitch');
